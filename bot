@@ -1,0 +1,46 @@
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+token = ("7700478061:AAHqTq-X9R4uIeNC6wA0p0cDrpka-C4eK1o")  # ✅ теперь из .env
+
+app = ApplicationBuilder().token(token).build()
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Привет! Я бот который поможет тебе найти фильм просто нажми /poisc или /info если хочешь узнать дополнительные возможности  .")
+
+async def poisc(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.message.text.strip()
+    link = f"https://kinogo.biz/index.php?do=search&subaction=search&story={query.replace(' ', '+')}"
+    history = context.user_data.get("history", [])
+    history.append(query)
+    context.user_data["history"] = history
+    await update.message.reply_text(f"🔍 Вот, что нашёл:\n{link}")
+
+async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("могу посоветовать фильм /favorit_cinema\n могу показать последние 3 фильма /istoria ")
+
+async def favorit_cinema(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("обитель зла https://kinogo.biz/18403-obitel-zla.html\nтретий лишний https://kinogo.biz/25452-tretij-lishnij.html\n  интерстеллар https://kinogo.biz/17487-interstellar.html")
+
+async def istoria(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    history = context.user_data.get("history", [])
+    if not history:
+        await update.message.reply_text("История пуста. Попробуй найти что-то через /poisc")
+    else:
+        text = "🕘 Последние фильмы:\n" + "\n".join(f"- {item}" for item in history[-3:])
+        await update.message.reply_text(text)
+
+
+# Обработка обычных сообщений
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, poisc))
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("info", info))
+app.add_handler(CommandHandler("favorit_cinema", favorit_cinema))
+app.add_handler(CommandHandler("istoria", istoria))
+
+
+app.run_polling()

@@ -5,7 +5,7 @@ import os
 
 
 load_dotenv()
-token = ("7700478061:AAHqTq-X9R4uIeNC6wA0p0cDrpka-C4eK1o")  # ✅ теперь из .env
+token = ("BOT_TOKEN")  # ✅ теперь из .env
 
 app = ApplicationBuilder().token(token).build()
 
